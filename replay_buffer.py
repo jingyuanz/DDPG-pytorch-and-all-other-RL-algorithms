@@ -18,5 +18,19 @@ class ReplayBuffer:
     def sample_batch(self):
         batch_size = self.config.batch_size
         samples = sample(self.pool, batch_size)
-        return samples
+        statesT = []
+        statesTp1 = []
+        actions = []
+        rewards = []
+        done_flags = []
+        for st, at, rt, stp1, done in samples:
+            statesT.append(st)
+            actions.append(at)
+            rewards.append(rt)
+            statesTp1.append(stp1)
+            if done:
+                done_flags.append(0)
+            else:
+                done_flags.append(1)
+        return statesT, actions, rewards, statesTp1, done_flags
         

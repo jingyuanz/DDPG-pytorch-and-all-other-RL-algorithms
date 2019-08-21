@@ -10,10 +10,11 @@ class Config:
         self.state_size = 3
         self.pool_size = 100000
         self.batch_size = 64
-        self.num_epochs = 100
+        self.num_epochs = 1000
         self.update_interval = 20
         self.eval_interval = 20
-        self.fc1_dim = 400
-        self.fc2_dim = 200
-        self.fc1a_dim = 100
+        self.fc1_dim = 600
+        self.fc2_dim = 400
+        self.fc1a_dim = 200
         self.dropout = 0.5
+        self.env_name = 'Pendulum-v0'
