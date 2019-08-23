@@ -25,19 +25,22 @@ class Actor(nn.Module):
         self.fc2 = nn.Linear(self.config.fc1_dim, self.config.fc2_dim)
         init_ff_layer(self.fc2)
         self.bn2 = nn.LayerNorm(self.config.fc2_dim)
-        self.fc_mu = nn.Linear(self.config.fc2_dim, 1)
+        self.fc3 = nn.Linear(self.config.fc2_dim, self.config.fc3_dim)
+        init_ff_layer(self.fc3)
+        self.fc_mu = nn.Linear(self.config.fc3_dim, 1)
         self.optimizer = optim.Adam(lr=self.config.alpha, params=self.parameters())
         self.device = torch.device('cuda')
         self.to(self.device)
     
     def forward(self, state):
-        fc1_o = F.relu(self.fc1(state))
-        fc1_bn = self.bn1(fc1_o)
-        fc2_o = F.relu(self.fc2(fc1_bn))
-        fc2_bn = F.relu(self.bn2(fc2_o))
+        x = F.relu(self.fc1(state))
+        # x = self.bn1(x)
+        x = F.relu(self.fc2(x))
+        # x = self.bn2(x)
+        x = F.relu(self.fc3(x))
         # fc2_bn = F.dropout(fc2_bn)
-        fc_mu = F.tanh(self.fc_mu(fc2_bn))
-        return 2*fc_mu
+        fc_mu = torch.tanh(self.fc_mu(x))
+        return self.config.max_action*fc_mu
         
     def save(self):
         torch.save(self.state_dict(), self.config.actor_h5)
@@ -58,24 +61,27 @@ class Critic(nn.Module):
         init_ff_layer(self.fc1a)
         self.bn1a = nn.LayerNorm(self.config.fc1a_dim)
         
-        self.fc2 = nn.Linear(self.config.fc1_dim+self.config.fc1a_dim, self.config.fc2_dim)
+        self.fc2 = nn.Linear(self.config.fc1_dim, self.config.fc2_dim)
         init_ff_layer(self.fc2)
         self.bn2 = nn.LayerNorm(self.config.fc2_dim)
-        self.fc_mu = nn.Linear(self.config.fc2_dim, 1)
+        self.fc3 = nn.Linear(self.config.fc2_dim, self.config.fc3_dim)
+        init_ff_layer(self.fc3)
+        self.fc_q = nn.Linear(self.config.fc3_dim, 1)
         self.optimizer = optim.Adam(lr=self.config.beta, params=self.parameters())
         self.device = torch.device('cuda')
         self.to(self.device)
 
     def forward(self, state, action):
         x = F.relu(self.fc1s(state))
-        x = self.bn1s(x)
+        # x = self.bn1s(x)
         y = F.relu(self.fc1a(action))
-        y = self.bn1a(y)
-        xy = torch.cat((x,y), dim=-1)
-        fc2_o = F.relu(self.fc2(xy))
-        fc2_bn = F.relu(self.bn2(fc2_o))
+        # y = self.bn1a(y)
+        xy = torch.add(x,y)
+        z = F.relu(self.fc2(xy))
+        # z = F.relu(self.bn2(z))
+        z = F.relu(self.fc3(z))
         # fc2_bn = F.dropout(fc2_bn)
-        fc_q = self.fc_mu(fc2_bn)
+        fc_q = self.fc_q(z)
         return fc_q
     
     def save(self):

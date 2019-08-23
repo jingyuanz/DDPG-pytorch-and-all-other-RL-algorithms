@@ -3,7 +3,7 @@ from model import *
 from replay_buffer import ReplayBuffer
 
 class OUActionNoise:
-    def __init__(self, mu, sigma=0.15, theta=.2, dt=1e-2, x0=None):
+    def __init__(self, mu, sigma=0.25, theta=.1, dt=1, x0=None):
         self.theta = theta
         self.mu = mu
         self.sigma = sigma
