@@ -22,4 +22,9 @@ class StockEnv(gym.Env):
         self.share = randint(self.config.MIN_SHARE, self.config.MAX_SHARE)
         self.net = rand() + 0.5
         self.init_fund = self.net * init_price + self.fund #TODO
-        
+
+    def step(self):
+        pass
+
+    def render(self):
+        pass

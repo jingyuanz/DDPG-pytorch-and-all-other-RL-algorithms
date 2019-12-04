@@ -27,9 +27,9 @@ class Actor(nn.Module):
         self.bn2 = nn.LayerNorm(self.config.fc2_dim)
         self.fc3 = nn.Linear(self.config.fc2_dim, self.config.fc3_dim)
         init_ff_layer(self.fc3)
-        self.fc_mu = nn.Linear(self.config.fc3_dim, 1)
+        self.fc_mu = nn.Linear(self.config.fc2_dim, 1)
         self.optimizer = optim.Adam(lr=self.config.alpha, params=self.parameters())
-        self.device = torch.device('cuda')
+        self.device = self.config.device
         self.to(self.device)
     
     def forward(self, state):
@@ -37,7 +37,7 @@ class Actor(nn.Module):
         # x = self.bn1(x)
         x = F.relu(self.fc2(x))
         # x = self.bn2(x)
-        x = F.relu(self.fc3(x))
+        # x = F.relu(self.fc3(x))
         # fc2_bn = F.dropout(fc2_bn)
         fc_mu = torch.tanh(self.fc_mu(x))
         return self.config.max_action*fc_mu
@@ -66,9 +66,9 @@ class Critic(nn.Module):
         self.bn2 = nn.LayerNorm(self.config.fc2_dim)
         self.fc3 = nn.Linear(self.config.fc2_dim, self.config.fc3_dim)
         init_ff_layer(self.fc3)
-        self.fc_q = nn.Linear(self.config.fc3_dim, 1)
+        self.fc_q = nn.Linear(self.config.fc2_dim, 1)
         self.optimizer = optim.Adam(lr=self.config.beta, params=self.parameters())
-        self.device = torch.device('cuda')
+        self.device = self.config.device
         self.to(self.device)
 
     def forward(self, state, action):
@@ -79,7 +79,7 @@ class Critic(nn.Module):
         xy = torch.add(x,y)
         z = F.relu(self.fc2(xy))
         # z = F.relu(self.bn2(z))
-        z = F.relu(self.fc3(z))
+        # z = F.relu(self.fc3(z))
         # fc2_bn = F.dropout(fc2_bn)
         fc_q = self.fc_q(z)
         return fc_q

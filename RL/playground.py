@@ -1,4 +1,4 @@
-from agent import *
+from agent.a2c import *
 from config import Config
 import gym
 import numpy as np
